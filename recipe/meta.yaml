@@ -1,5 +1,5 @@
 {% set name = "typer" %}
-{% set version = "0.4.0" %}
+{% set version = "0.4.1" %}
 
 package:
   name: {{ name }}
@@ -7,11 +7,10 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 63c3aeab0549750ffe40da79a1b524f60e08a2cbc3126c520ebf2eeaf507f5dd
+  sha256: 5646aef0d936b2c761a10393f0384ee6b5c7fe0bb3e5cd710b17134ca1d99cff
 
 build:
   skip: True  # [py<36]
-  noarch: python
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps
 
@@ -20,7 +19,6 @@ requirements:
     - python
     - pip
     - flit-core >=2,<3
-    - setuptools
     - wheel
   run:
     - python >=3.6
@@ -34,7 +32,6 @@ test:
     - typer
   requires:
     - pip
-    - python <3.10
   commands:
     - pip check
 
