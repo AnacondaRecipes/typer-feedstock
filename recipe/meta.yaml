@@ -1,5 +1,5 @@
 {% set name = "typer" %}
-{% set version = "0.4.1" %}
+{% set version = "0.9.0" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 5646aef0d936b2c761a10393f0384ee6b5c7fe0bb3e5cd710b17134ca1d99cff
+  sha256: 50922fd79aea2f4751a8e0408ff10d2662bd0c8bbfa84755a699f3bada2978b2
 
 build:
   skip: True  # [py<36]
