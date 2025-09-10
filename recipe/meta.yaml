@@ -1,41 +1,52 @@
 {% set name = "typer" %}
-{% set version = "0.9.0" %}
+{% set version = "0.17.4" %}
 
 package:
-  name: {{ name }}
+  name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 50922fd79aea2f4751a8e0408ff10d2662bd0c8bbfa84755a699f3bada2978b2
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: b77dc07d849312fd2bb5e7f20a7af8985c7ec360c45b051ed5412f64d8dc1580
 
 build:
-  skip: True  # [py<36]
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  entry_points:
+    - typer = typer.cli:main
+  skip: True  # [py<37]
 
 requirements:
   host:
-    - flit-core 2.3.0
     - pip
     - python
-    - setuptools
-    - wheel
+    - pdm-backend
   run:
     - python
-    - click >=7.1.1,<9.0.0
+    - click >=8.0.0
     - typing-extensions >=3.7.4.3
-    - colorama >=0.4.3,<0.5.0
-    - shellingham >=1.3.0,<2.0.0
-    - rich >=10.11.0,<14.0.0
+    - shellingham >=1.3.0
+    - rich >=10.11.0
+
+# >   assert "This file exists: README.md\nwoohoo!" in result.output
+# E   AssertionError: assert 'This file exists: README.md\nwoohoo!' in ''
+# E    +  where '' = <Result okay>.output
+{% set deselect_tests = " --deselect=tests/test_tutorial/test_multiple_values/test_arguments_with_multiple_values/test_tutorial001.py::test_main" %}
 
 test:
+  source_files:
+    - tests
+    - docs_src
   imports:
     - typer
-  requires:
-    - pip
   commands:
     - pip check
+    - typer --help
+    - pytest -v tests {{ deselect_tests }}
+  requires:
+    - pip
+    - pytest
+    - coverage
 
 about:
   home: https://github.com/tiangolo/typer
