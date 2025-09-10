@@ -32,6 +32,10 @@ requirements:
 # E   AssertionError: assert 'This file exists: README.md\nwoohoo!' in ''
 # E    +  where '' = <Result okay>.output
 {% set deselect_tests = " --deselect=tests/test_tutorial/test_multiple_values/test_arguments_with_multiple_values/test_tutorial001.py::test_main" %}
+#>  assert "100.5 is not in the range x<=100." in result.output
+#E  assert '100.5 is not in the range x<=100.'
+{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_number/test_tutorial001.py::test_invalid_score" %}  # [py>39]
+{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_number/test_tutorial001_an.py::test_invalid_score" %}  # [py>39]
 
 test:
   source_files:
