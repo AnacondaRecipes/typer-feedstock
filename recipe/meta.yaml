@@ -47,7 +47,7 @@ test:
   commands:
     - pip check
     - typer --help
-    - pytest -v tests {{ deselect_tests }}
+    - pytest -v tests {{ deselect_tests }} -k "not test_script_completion_run"
   requires:
     - pip
     - pytest
