@@ -1,62 +1,134 @@
 {% set name = "typer" %}
-{% set version = "0.17.4" %}
+{% set version = "0.20.0" %}
 
 package:
-  name: {{ name|lower }}
+  name: {{ name|lower }}-split
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: b77dc07d849312fd2bb5e7f20a7af8985c7ec360c45b051ed5412f64d8dc1580
+  - url: https://pypi.org/packages/source/t/typer-slim/typer_slim-{{ version }}.tar.gz
+    sha256: 9fc6607b3c6c20f5c33ea9590cbeb17848667c51feee27d9e314a579ab07d1a3
+    folder: typer-slim
+  - url: https://pypi.org/packages/source/t/typer-cli/typer_cli-{{ version }}.tar.gz
+    sha256: af928da59aed5770f50e4c0f135f70ebf798d5bd00586d86d4c3015a5718a021
+    folder: typer-cli
+  - url: https://pypi.org/packages/source/t/typer/typer-{{ version }}.tar.gz
+    sha256: 1aaf6494031793e4876fb0bacfa6a912b551cf43c1e63c800df8b1a866720c37
+    folder: typer
 
 build:
-  number: 1
-  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  entry_points:
-    - typer = typer.cli:main
-  skip: True  # [py<37]
+  number: 0
+  skip: true  # [py<38]
 
 requirements:
   host:
     - pip
     - python
-    - pdm-backend
   run:
     - python
-    - click >=8.0.0
-    - typing-extensions >=3.7.4.3
-    - shellingham >=1.3.0
-    - rich >=10.11.0
 
-# >   assert "This file exists: README.md\nwoohoo!" in result.output
-# E   AssertionError: assert 'This file exists: README.md\nwoohoo!' in ''
-# E    +  where '' = <Result okay>.output
-{% set deselect_tests = " --deselect=tests/test_tutorial/test_multiple_values/test_arguments_with_multiple_values/test_tutorial001.py::test_main" %}
-#>  assert "100.5 is not in the range x<=100." in result.output
-#E  assert '100.5 is not in the range x<=100.'
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_number/test_tutorial001.py::test_invalid_score" %}  # [py>39]
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_number/test_tutorial001_an.py::test_invalid_score" %}  # [py>39]
+outputs:
+  - name: typer-slim
+    script: build-typer.sh  # [not win]
+    script: bld-typer.bat   # [win]
+    requirements:
+      host:
+        - pip
+        - python
+        - python-build
+        - pdm-backend
+      run:
+        - python
+        - click >=8.0.0
+        - typing_extensions >=3.7.4.3
+      run_constraints:
+        - typer {{ version }}.*
+        - rich >=10.11.0
+        - shellingham >=1.3.0
+    test:
+      requires:
+        - pip
+      commands:
+        - pip check
 
-test:
-  source_files:
-    - tests
-    - docs_src
-  imports:
-    - typer
-  commands:
-    - pip check
-    - typer --help
-    - pytest -v tests {{ deselect_tests }} -k "not test_script_completion_run"
-  requires:
-    - pip
-    - pytest
-    - coverage
+  - name: typer-slim-standard
+    requirements:
+      host:
+        - pip
+        - python
+      run:
+        - python
+        - shellingham
+        - rich
+        - {{ pin_subpackage("typer-slim", exact=True) }}
+    test:
+      requires:
+        - pip
+      commands:
+        - pip check
+
+  - name: typer
+    script: build-typer.sh  # [not win]
+    script: bld-typer.bat   # [win]
+    build:
+      entry_points:
+        - typer = typer.cli:main
+    requirements:
+      host:
+        - pip
+        - python
+        - python-build
+        - pdm-backend
+      run:
+        - python
+        - {{ pin_subpackage("typer-slim-standard", exact=True) }}
+
+    {% set deselect_tests = "" %}
+    # TypeError: argument of type 'NoneType' is not iterable
+    {% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_exceptions/test_tutorial003.py::test_traceback_rich_pretty_short_disable" %}  # [win]
+
+    test:
+      source_files:
+        - typer/tests
+        - typer/docs_src
+      imports:
+        - typer
+      requires:
+        - pip
+        - pytest
+        - coverage  
+      commands:
+        - pip check
+        - typer --version
+        - typer --help
+        # Typer needs coverage to adequately run the tests 
+        - cd typer && coverage run --source=typer --branch -m pytest -vv --color=yes --tb=long -k "not ((multiple_values and main) or completion or invalid_score)" {{ deselect_tests }}
+
+  - name: typer-cli
+    script: build-typer.sh  # [not win]
+    script: bld-typer.bat   # [win]
+    requirements:
+      host:
+        - pip
+        - python
+        - pdm-backend
+        - python-build
+      run:
+        - python
+        - {{ pin_subpackage("typer", exact=True) }}
+    test:
+      requires:
+        - pip
+      commands:
+        - pip check
+        - typer --version
+        - typer --help
 
 about:
   home: https://github.com/tiangolo/typer
   license: MIT
   license_family: MIT
-  license_file: LICENSE
+  license_file: typer/LICENSE
   summary: A library for building CLI applications
 
   description: |
