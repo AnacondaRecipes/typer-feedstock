@@ -3,6 +3,4 @@ upstream_sources:
   - pypi:
       identifier: typer
     packages:
-      - typer-cli
-      - typer-slim
-      - typer-slim-standard
+      - typer
