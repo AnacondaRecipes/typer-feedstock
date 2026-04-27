@@ -20,7 +20,8 @@ requirements:
 
 outputs:
   - name: typer
-    script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+    script: build.sh  # [not win]
+    script: bld.bat  # [win]
     build:
       entry_points:
         - typer = typer.cli:main
