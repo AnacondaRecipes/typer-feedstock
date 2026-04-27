@@ -12,8 +12,15 @@ build:
   number: 0
   skip: true  # [py<310]
 
+# Host deps must appear here as well: conda-build uses top-level host for the
+# install env when building outputs, so pip/pdm-backend only under outputs can
+# be omitted from the solve (e.g. Python 3.14 then has no `python -m pip`).
 requirements:
   host:
+    - pip
+    - pdm-backend
+    - setuptools
+    - wheel
     - python
   run:
     - python
@@ -27,8 +34,10 @@ outputs:
         - typer = typer.cli:main
     requirements:
       host:
-        - pdm-backend
         - pip
+        - pdm-backend
+        - setuptools
+        - wheel
         - python
       run:
         - python
