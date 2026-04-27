@@ -1,7 +1,7 @@
 {% set version = "0.25.0" %}
 
 package:
-  name: typer-split
+  name: typer
   version: {{ version }}
 
 source:
@@ -11,10 +11,10 @@ source:
 build:
   number: 0
   skip: true  # [py<310]
+  entry_points:
+    - typer = typer.cli:main
+  script: {{ PYTHON}} -m pip install . -vv --no-deps --no-build-isolation
 
-# Host deps must appear here as well: conda-build uses top-level host for the
-# install env when building outputs, so pip/pdm-backend only under outputs can
-# be omitted from the solve (e.g. Python 3.14 then has no `python -m pip`).
 requirements:
   host:
     - pip
@@ -23,45 +23,29 @@ requirements:
     - wheel
     - python
   run:
-    - python
+    - python >=3.10
+    - annotated-doc >=0.0.2
+    - click >=8.2.1
+    - rich >=13.8.0
+    - shellingham >=1.3.0
 
-outputs:
-  - name: typer
-    script: build.sh  # [not win]
-    script: bld.bat  # [win]
-    build:
-      entry_points:
-        - typer = typer.cli:main
-    requirements:
-      host:
-        - pip
-        - pdm-backend
-        - setuptools
-        - wheel
-        - python
-      run:
-        - python
-        - annotated-doc >=0.0.2
-        - click >=8.2.1
-        - rich >=13.8.0
-        - shellingham >=1.3.0
-    test:
-      source_files:
-        - tests/
-        - docs_src/
-      imports:
-        - typer
-      requires:
-        - pip
-        - coverage
-        - pytest
-        - python
-      commands:
-        - pip check
-        - typer --version
-        - typer --help
-        - coverage run --source=typer --branch -m pytest -vv --color=yes --tb=long -k "not ((multiple_values and main) or completion or invalid_score)"
-        - coverage report --show-missing --skip-covered --fail-under=66
+test:
+  source_files:
+    - tests/
+    - docs_src/
+  imports:
+    - typer
+  requires:
+    - pip
+    - coverage
+    - pytest
+    - python
+  commands:
+    - pip check
+    - typer --version
+    - typer --help
+    - coverage run --source=typer --branch -m pytest -vv --color=yes --tb=long -k "not ((multiple_values and main) or completion or invalid_score)"
+    - coverage report --show-missing --skip-covered --fail-under=66
 
 about:
   home: https://pypi.org/project/typer
