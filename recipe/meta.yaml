@@ -10,28 +10,27 @@ source:
 
 build:
   number: 0
-  noarch: python
+  skip: true  # [py<310]
 
 requirements:
   host:
-    - python >=3.10
+    - python
   run:
-    - python >=3.10
+    - python
 
 outputs:
   - name: typer
+    script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
     build:
-      noarch: python
       entry_points:
         - typer = typer.cli:main
-      script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
     requirements:
       host:
         - pdm-backend
         - pip
-        - python >=3.10
+        - python
       run:
-        - python >=3.10
+        - python
         - annotated-doc >=0.0.2
         - click >=8.2.1
         - rich >=13.8.0
@@ -46,7 +45,7 @@ outputs:
         - pip
         - coverage
         - pytest
-        - python >=3.10
+        - python
       commands:
         - pip check
         - typer --version
