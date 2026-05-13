@@ -22,7 +22,7 @@ source:
   sha256: 9616eb8853a09ffeabab1698952f33c6f29ffdbceb4eaeecf571880e8d7664cc
 
 build:
-  number: 2
+  number: 0
   skip: true  # [py<310]
   entry_points:
     - typer = typer.cli:main
@@ -50,6 +50,10 @@ requirements:
 {% set deselect_tests = deselect_tests + " --deselect=tests/test_tracebacks.py::test_rich_exceptions_dont_truncate_code_on_wide_terminal" %}
 {% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial001.py::test_cli" %}
 {% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial002.py::test_cli" %}
+# Windows: Rich wraps the invalid-path error across panel lines, so the substring "does not exist"
+# is not contiguous in stdout; upstream test_not_exists assumes it is (test_path/test_tutorial002.py).
+{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_py310]" %}  # [win]
+{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_an_py310]" %}  # [win]
 
 test:
   source_files:
