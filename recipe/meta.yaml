@@ -9,17 +9,27 @@
 #
 # Conda users who previously installed typer-slim, typer-slim-standard, or typer-cli
 # should depend on typer instead; those subpackage names are no longer produced here.
-
 {% set name = "typer" %}
-{% set version = "0.25.1" %}
+{% set version = "0.27.2" %}
+{% set deselect_tests = "" %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_exceptions/test_tutorial003.py::test_traceback_rich_pretty_short_disable"' %}  # [win]
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tracebacks.py::test_rich_exceptions_dont_truncate_code_on_wide_terminal"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial001.py::test_cli"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial002.py::test_cli"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_py310]"' %}  # [win]
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_an_py310]"' %}  # [win]
 
+# TypeError: argument of type 'NoneType' is not iterable
+# Rich layout / print() expectations differ when tests run under conda-build + coverage
+# Windows: Rich wraps the invalid-path error across panel lines, so the substring "does not exist"
+# is not contiguous in stdout; upstream test_not_exists assumes it is (test_path/test_tutorial002.py).
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
   url: https://pypi.org/packages/source/t/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 9616eb8853a09ffeabab1698952f33c6f29ffdbceb4eaeecf571880e8d7664cc
+  sha256: 269b7eb9d3c202ca84b4bc9618cb04ebb43d3d4d1e567e4c768607232c05f945
 
 build:
   number: 0
@@ -32,8 +42,6 @@ requirements:
   host:
     - pip
     - python
-    - setuptools
-    - wheel
     - python-build
     - pdm-backend
   run:
@@ -42,18 +50,7 @@ requirements:
     - shellingham >=1.3.0
     - rich >=13.8.0
     - annotated-doc >=0.0.2
-
-{% set deselect_tests = "" %}
-# TypeError: argument of type 'NoneType' is not iterable
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_exceptions/test_tutorial003.py::test_traceback_rich_pretty_short_disable" %}  # [win]
-# Rich layout / print() expectations differ when tests run under conda-build + coverage
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tracebacks.py::test_rich_exceptions_dont_truncate_code_on_wide_terminal" %}
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial001.py::test_cli" %}
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial002.py::test_cli" %}
-# Windows: Rich wraps the invalid-path error across panel lines, so the substring "does not exist"
-# is not contiguous in stdout; upstream test_not_exists assumes it is (test_path/test_tutorial002.py).
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_py310]" %}  # [win]
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_an_py310]" %}  # [win]
+    - colorama  # [win]
 
 test:
   source_files:
@@ -78,7 +75,6 @@ about:
   license_family: MIT
   license_file: LICENSE
   summary: A library for building CLI applications
-
   description: |
     Typer is library for building CLI applications that users will love using and developers will love creating. Based on Python type hints.
 
