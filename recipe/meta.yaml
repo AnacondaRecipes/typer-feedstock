@@ -10,15 +10,30 @@
 # Conda users who previously installed typer-slim, typer-slim-standard, or typer-cli
 # should depend on typer instead; those subpackage names are no longer produced here.
 {% set name = "typer" %}
-{% set version = "0.27.2" %}
+{% set version = "0.27.3" %}
+{% set deselect_tests = "" %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_exceptions/test_tutorial003.py::test_traceback_rich_pretty_short_disable"' %}  # [win]
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tracebacks.py::test_rich_exceptions_dont_truncate_code_on_wide_terminal"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial001.py::test_cli"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial002.py::test_cli"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_py310]"' %}  # [win]
+{% set deselect_tests = 'deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_an_py310]"' %}  # [win]
+{% set tests_to_skip = " or completion" %}
+{% set tests_to_skip = tests_to_skip + " or invalid_score" %}
+{% set tests_to_skip = tests_to_skip + " or test_file_error" %}
 
+# TypeError: argument of type 'NoneType' is not iterable
+# Rich layout / print() expectations differ when tests run under conda-build + coverage
+# Windows: Rich wraps the invalid-path error across panel lines, so the substring "does not exist"
+# is not contiguous in stdout; upstream test_not_exists assumes it is (test_path/test_tutorial002.py).
+# assert 'cannot-open.txt' in "\u256d\u2500 Error
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
   url: https://pypi.org/packages/source/t/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 269b7eb9d3c202ca84b4bc9618cb04ebb43d3d4d1e567e4c768607232c05f945
+  sha256: d0396f770a560ab1b0a8504e13b5f254b728cedb05c61cf0359e944e50ce8901
 
 build:
   number: 0
@@ -39,24 +54,6 @@ requirements:
     - rich >=13.8.0
     - annotated-doc >=0.0.2
     - colorama  # [win]
-
-# TypeError: argument of type 'NoneType' is not iterable
-# Rich layout / print() expectations differ when tests run under conda-build + coverage
-# Windows: Rich wraps the invalid-path error across panel lines, so the substring "does not exist"
-# is not contiguous in stdout; upstream test_not_exists assumes it is (test_path/test_tutorial002.py).
-
-{% set deselect_tests = "" %}
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_exceptions/test_tutorial003.py::test_traceback_rich_pretty_short_disable" %}  # [win]
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tracebacks.py::test_rich_exceptions_dont_truncate_code_on_wide_terminal" %}
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial001.py::test_cli" %}
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_printing/test_tutorial002.py::test_cli" %}
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_py310]" %}  # [win]
-{% set deselect_tests = deselect_tests + " --deselect=tests/test_tutorial/test_parameter_types/test_path/test_tutorial002.py::test_not_exists[tutorial002_an_py310]" %}  # [win]
-
-{% set tests_to_skip = " or completion" %}
-{% set tests_to_skip = tests_to_skip + " or invalid_score" %}
-# assert 'cannot-open.txt' in "\u256d\u2500 Error 
-{% set tests_to_skip = tests_to_skip + " or test_file_error" %}
 
 test:
   source_files:
