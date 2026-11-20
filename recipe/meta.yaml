@@ -60,9 +60,8 @@ requirements:
 {% set tests_to_skip = tests_to_skip + " or test_file_error" %}
 
 # Rich wraps help/panel output at the 80-col default when stdout is not a TTY
-# (conda-build test env); several upstream help assertions expect a wider line.
-# Force a wide terminal via COLUMNS so those tests run instead of being dropped.
-{% set cols_env = "set COLUMNS=200 && " if win else "COLUMNS=200 " %}
+# (conda-build test env); several upstream help assertions expect a wider line,
+# so set COLUMNS=200 to run them instead of deselecting.
 
 test:
   source_files:
@@ -80,7 +79,7 @@ test:
     - pip check
     - typer --version
     - typer --help
-    - {{ cols_env }}PYTHONPATH=. coverage run --source=typer --branch -m pytest tests -vv --color=yes --tb=long -k "not ((multiple_values and main){{ tests_to_skip }})" {{ deselect_tests }}
+    - COLUMNS=200 PYTHONPATH=. coverage run --source=typer --branch -m pytest tests -vv --color=yes --tb=long -k "not ((multiple_values and main){{ tests_to_skip }})" {{ deselect_tests }}
 
 about:
   home: https://github.com/fastapi/typer
